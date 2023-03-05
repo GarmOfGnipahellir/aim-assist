@@ -38,12 +38,12 @@ space.add({
           .strokeOnly(RED)
           .dash()
           .line(
-            Line.fromAngle(space.center, angleTarget.start(), canvasRadius)
+            Line.fromAngle(space.center, angleTarget.start() * (Math.PI * 2), canvasRadius)
           );
         form
           .strokeOnly(RED)
           .dash()
-          .line(Line.fromAngle(space.center, angleTarget.end(), canvasRadius));
+          .line(Line.fromAngle(space.center, angleTarget.end() * (Math.PI * 2), canvasRadius));
       }
     }
     form.reset();
@@ -77,7 +77,9 @@ space.add({
 
     let delta = space.pointer.$subtract(space.center);
     let inputAngle = Math.atan2(delta.y, delta.x);
-    let outputAngle = transform(inputAngle, angleTargets);
+    let normInputAngle = inputAngle / (Math.PI * 2);
+    let normOutputAngle = transform(normInputAngle, angleTargets);
+    let outputAngle = normOutputAngle * (Math.PI * 2);
     form
       .strokeOnly(GREEN)
       .dash()

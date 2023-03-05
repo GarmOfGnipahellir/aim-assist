@@ -106,5 +106,5 @@ export default function transform(
   input: number,
   targets: AngleTarget[]
 ): number {
-  return transformAccumDelta(input, targets);
+  return transformSinCombiner(input, targets);
 }

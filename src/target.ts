@@ -15,8 +15,8 @@ export class CanvasTarget {
   toAngleTarget(): AngleTarget {
     let delta = this.position.$subtract(space.center);
     let distance = delta.magnitude();
-    let anglePosition = Math.atan2(delta.y, delta.x);
-    let angleRadius = Math.asin(this.radius / distance);
+    let anglePosition = Math.atan2(delta.y, delta.x) / (Math.PI * 2);
+    let angleRadius = Math.asin(this.radius / distance) / (Math.PI * 2);
     return new AngleTarget(anglePosition, angleRadius, distance);
   }
 }
