@@ -2,13 +2,16 @@ import { Pane } from "tweakpane";
 import { CanvasSpace, Pt, Group, Line, Circle, Num } from "pts";
 import { CanvasTarget } from "./target";
 import transform from "./transformer";
+import "./input";
+import { setInputMode, updateInput, inputAngle } from "./input";
+import { weights, weightsSum } from "./weighted_transformer";
 
 const RED = "#f23";
 const GREEN = "#6f6";
 
 export let params = {
-  inEdge: 0.05,
-  outMiddle: 0.2,
+  inEdge: 1.0,
+  outMiddle: 0.5,
   outEdge: 0.1,
   resolution: 360,
   showInputDirection: true,
@@ -91,8 +94,8 @@ space.add({
       canvasTarget.toAngleTarget()
     );
 
-    let delta = space.pointer.$subtract(space.center);
-    let inputAngle = Math.atan2(delta.y, delta.x);
+    updateInput();
+
     let normInputAngle = inputAngle / (Math.PI * 2);
     let normOutputAngle = transform(normInputAngle, angleTargets);
     let outputAngle = normOutputAngle * (Math.PI * 2);
@@ -114,9 +117,8 @@ space.add({
       let inputEnd = i * angleStep - Math.PI;
       let normInputStart = inputStart / (Math.PI * 2);
       let normInputEnd = inputEnd / (Math.PI * 2);
-      let outputStart =
-        transform(normInputStart, angleTargets) - normInputStart;
-      let outputEnd = transform(normInputEnd, angleTargets) - normInputEnd;
+      let outputStart = weightsSum(normInputStart, angleTargets);
+      let outputEnd = weightsSum(normInputEnd, angleTargets);
       let distStart =
         Num.mapToRange(
           outputStart,
@@ -147,6 +149,8 @@ space.add({
     }
   },
   action(type, px, py, evt) {
+    setInputMode("mouse");
+
     if (type == "click" && !pendingTarget) {
       for (let i = targets.length - 1; i >= 0; i--) {
         let target = targets[i];

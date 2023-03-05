@@ -5,3 +5,7 @@ declare class NodeModule {
     data: any;
   };
 }
+
+declare let joypad: {
+  on: (event: string, callback: (e: any) => void) => void;
+};
