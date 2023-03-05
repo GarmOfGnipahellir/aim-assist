@@ -4,7 +4,8 @@ import { CanvasTarget } from "./target";
 import transform from "./transformer";
 import "./input";
 import { setInputMode, updateInput, inputAngle } from "./input";
-import { weights, weightsSum } from "./weighted_transformer";
+import { weight, weights, weightsSum } from "./weighted_transformer";
+import { CircleGraph } from "./circle_graph";
 
 export let params = {
   inEdge: 1.0,
@@ -26,15 +27,17 @@ drawFolder.addInput(params, "showTargetEdges");
 
 export const space = new CanvasSpace("#main");
 space.setup({ bgcolor: "#111", resize: true });
-const form = space.getForm();
+export const form = space.getForm();
+export let canvasRadius: number;
+export let canvasHalfMin: number;
 
 export let targets: CanvasTarget[] = [];
 let pendingTarget: CanvasTarget | null = null;
 
 space.add({
   animate: () => {
-    const canvasRadius = space.center.magnitude();
-    const canvasHalfMin = Math.min(space.center.x, space.center.y);
+    canvasRadius = space.center.magnitude();
+    canvasHalfMin = Math.min(space.center.x, space.center.y);
 
     for (const target of targets) {
       let circle = target.toCircle();
@@ -108,42 +111,12 @@ space.add({
       .line(Line.fromAngle(space.center, outputAngle, canvasRadius));
     form.reset();
 
-    let angleStep = (Math.PI * 2) / params.resolution;
-    for (let i = 1; i <= params.resolution; i++) {
-      let inputStart = (i - 1) * angleStep - Math.PI;
-      let inputEnd = i * angleStep - Math.PI;
-      let normInputStart = inputStart / (Math.PI * 2);
-      let normInputEnd = inputEnd / (Math.PI * 2);
-      let outputStart = weightsSum(normInputStart, angleTargets);
-      let outputEnd = weightsSum(normInputEnd, angleTargets);
-      let distStart =
-        Num.mapToRange(
-          outputStart,
-          -params.inEdge,
-          params.inEdge,
-          params.outMiddle - params.outEdge,
-          params.outMiddle + params.outEdge
-        ) * canvasHalfMin;
-      let distEnd =
-        Num.mapToRange(
-          outputEnd,
-          -params.inEdge,
-          params.inEdge,
-          params.outMiddle - params.outEdge,
-          params.outMiddle + params.outEdge
-        ) * canvasHalfMin;
-      let ptStart = new Pt(
-        Math.cos(inputStart) * distStart,
-        Math.sin(inputStart) * distStart
-      );
-      let ptEnd = new Pt(
-        Math.cos(inputEnd) * distEnd,
-        Math.sin(inputEnd) * distEnd
-      );
-      form
-        .strokeOnly("#fff")
-        .line(new Group(ptStart, ptEnd).moveBy(space.center));
+    for (let i = 0; i < targets.length; i++) {
+      new CircleGraph((input) => weight(input, angleTargets[i]))
+        .color(targets[i].color.hex)
+        .draw();
     }
+    new CircleGraph((input) => weightsSum(input, angleTargets)).draw();
   },
   action(type, px, py, evt) {
     setInputMode("mouse");

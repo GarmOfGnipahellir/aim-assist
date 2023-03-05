@@ -20,11 +20,15 @@ function saturate(a: number): number {
   return clamp(a, 0, 1);
 }
 
+export function weight(input: number, target: AngleTarget): number {
+  let x = (input - target.position) / (target.radius * 8) + 0.5;
+  let mask = saturate(1 - abs(floor(x)));
+  return (sin((x - 0.25) * PI * 2) * 0.5 + 0.5) * mask;
+}
+
 export function weights(input: number, targets: AngleTarget[]): number[] {
   return targets.map((target) => {
-    let x = ((input - target.position) / (target.radius * 8)) + 0.5;
-    let mask = saturate(1 - abs(floor(x)));
-    return (sin((x - 0.25) * PI * 2) * 0.5 + 0.5) * mask;
+    return weight(input, target);
   });
 }
 
