@@ -1,5 +1,6 @@
 import { Pane } from "tweakpane";
 import { CanvasSpace, Pt, Group, Line, Circle, Num } from "pts";
+import { CanvasTarget } from "./target";
 import transform from "./transformer";
 
 const RED = "#f23";
@@ -20,34 +21,29 @@ export const space = new CanvasSpace("#main");
 space.setup({ bgcolor: "#111", resize: true });
 const form = space.getForm();
 
-export const TARGETS: { position: Pt; radius: number }[] = [];
-let pendingTarget: { position: Pt; radius: number } | null = null;
+export const TARGETS: CanvasTarget[] = [];
+let pendingTarget: CanvasTarget | null = null;
 
 space.add({
   animate: () => {
-    const canvasRadius = Math.sqrt(
-      space.center.x * space.center.x + space.center.y * space.center.y
-    );
+    const canvasRadius = space.center.magnitude();
     const canvasHalfMin = Math.min(space.center.x, space.center.y);
 
     for (const target of TARGETS) {
-      let circle = Circle.fromCenter(target.position, target.radius);
+      let circle = target.toCircle();
       form.fillOnly(RED).circle(circle);
       if (Circle.withinBound(circle, space.pointer)) {
-        let delta = target.position.$subtract(space.center);
-        let distance = delta.magnitude();
-        let anglePosition = Math.atan2(delta.y, delta.x);
-        let angleSize = Math.asin(target.radius / distance);
-        let angleStart = anglePosition - angleSize;
-        let angleEnd = anglePosition + angleSize;
+        let angleTarget = target.toAngleTarget();
         form
           .strokeOnly(RED)
           .dash()
-          .line(Line.fromAngle(space.center, angleStart, canvasRadius));
+          .line(
+            Line.fromAngle(space.center, angleTarget.start(), canvasRadius)
+          );
         form
           .strokeOnly(RED)
           .dash()
-          .line(Line.fromAngle(space.center, angleEnd, canvasRadius));
+          .line(Line.fromAngle(space.center, angleTarget.end(), canvasRadius));
       }
     }
     form.reset();
@@ -75,9 +71,13 @@ space.add({
     form.point(space.center, canvasHalfMin * PARAMS.outMax, "circle");
     form.reset();
 
+    let angleTargets = TARGETS.map((canvasTarget) =>
+      canvasTarget.toAngleTarget()
+    );
+
     let delta = space.pointer.$subtract(space.center);
     let inputAngle = Math.atan2(delta.y, delta.x);
-    let outputAngle = transform(inputAngle);
+    let outputAngle = transform(inputAngle, angleTargets);
     form
       .strokeOnly(GREEN)
       .dash()
@@ -92,8 +92,8 @@ space.add({
     for (let i = 1; i <= PARAMS.resolution; i++) {
       let inputStart = (i - 1) * angleStep;
       let inputEnd = i * angleStep;
-      let outputStart = transform(inputStart);
-      let outputEnd = transform(inputEnd);
+      let outputStart = transform(inputStart, angleTargets);
+      let outputEnd = transform(inputEnd, angleTargets);
       let distStart =
         Num.mapToRange(
           outputStart,
@@ -127,14 +127,13 @@ space.add({
     if (type == "click" && !pendingTarget) {
       for (let i = TARGETS.length - 1; i >= 0; i--) {
         let target = TARGETS[i];
-        let circle = Circle.fromCenter(target.position, target.radius);
-        if (Circle.withinBound(circle, new Pt(px, py))) {
+        if (target.isWithin(new Pt(px, py))) {
           TARGETS.splice(i, 1);
         }
       }
     }
     if (type == "drag" && !pendingTarget) {
-      pendingTarget = { position: new Pt(px, py), radius: 0.0 };
+      pendingTarget = new CanvasTarget(new Pt(px, py), 0.0);
     }
     if (type == "drag" && pendingTarget) {
       // hacky solution to not click new targets
