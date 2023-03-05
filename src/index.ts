@@ -41,11 +41,11 @@ space.add({
 
     for (const target of targets) {
       let circle = target.toCircle();
-      form.fillOnly(RED).circle(circle);
+      form.fillOnly(target.color.hex).circle(circle);
       if (params.showTargetEdges && Circle.withinBound(circle, space.pointer)) {
         let angleTarget = target.toAngleTarget();
         form
-          .strokeOnly(RED)
+          .strokeOnly(target.color.hex)
           .dash()
           .line(
             Line.fromAngle(
@@ -55,7 +55,7 @@ space.add({
             )
           );
         form
-          .strokeOnly(RED)
+          .strokeOnly(target.color.hex)
           .dash()
           .line(
             Line.fromAngle(
@@ -70,10 +70,10 @@ space.add({
 
     if (pendingTarget) {
       form
-        .strokeOnly(RED)
+        .strokeOnly(pendingTarget.color.hex)
         .point(pendingTarget.position, pendingTarget.radius, "circle");
       form
-        .strokeOnly(RED)
+        .strokeOnly(pendingTarget.color.hex)
         .dash()
         .line(new Group(pendingTarget.position, space.pointer));
       form.reset();

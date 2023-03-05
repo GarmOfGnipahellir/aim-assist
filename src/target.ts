@@ -1,8 +1,12 @@
-import { Circle, Group, Pt, PtLike } from "pts";
+import { Circle, Color, Group, Pt, PtLike } from "pts";
 import { space } from ".";
 
 export class CanvasTarget {
-  constructor(public position: Pt, public radius: number) {}
+  public color: Color;
+
+  constructor(public position: Pt, public radius: number) {
+    this.color = Color.HSBtoRGB(Color.hsb(Math.random() * 360, 1, 1));
+  }
 
   toCircle(): Group {
     return Circle.fromCenter(this.position, this.radius);
