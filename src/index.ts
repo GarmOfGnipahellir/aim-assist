@@ -6,9 +6,6 @@ import "./input";
 import { setInputMode, updateInput, inputAngle } from "./input";
 import { weights, weightsSum } from "./weighted_transformer";
 
-const RED = "#f23";
-const GREEN = "#6f6";
-
 export let params = {
   inEdge: 1.0,
   outMiddle: 0.5,
@@ -101,7 +98,7 @@ space.add({
     let outputAngle = normOutputAngle * (Math.PI * 2);
     if (params.showInputDirection) {
       form
-        .strokeOnly(GREEN)
+        .strokeOnly("#fff")
         .dash()
         .line(Line.fromAngle(space.center, inputAngle, canvasRadius));
     }
