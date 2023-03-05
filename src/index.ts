@@ -6,22 +6,27 @@ import transform from "./transformer";
 const RED = "#f23";
 const GREEN = "#6f6";
 
-export const PARAMS = {
+export let params = {
+  inEdge: 0.05,
   outMin: 0.4,
   outMax: 0.6,
   resolution: 360,
+  showInputDirection: true,
+  showTargetEdges: true,
 };
 
 const pane = new Pane({ title: "Parameters" });
-pane.addInput(PARAMS, "outMin", { min: 0.0, max: 1.0 });
-pane.addInput(PARAMS, "outMax", { min: 0.0, max: 1.0 });
-pane.addInput(PARAMS, "resolution", { min: 0, max: 1000, step: 10 });
+pane.addInput(params, "outMin", { min: 0.0, max: 1.0 });
+pane.addInput(params, "outMax", { min: 0.0, max: 1.0 });
+pane.addInput(params, "resolution", { min: 0, max: 1000, step: 10 });
+pane.addInput(params, "showInputDirection");
+pane.addInput(params, "showTargetEdges");
 
 export const space = new CanvasSpace("#main");
 space.setup({ bgcolor: "#111", resize: true });
 const form = space.getForm();
 
-export const TARGETS: CanvasTarget[] = [];
+export let targets: CanvasTarget[] = [];
 let pendingTarget: CanvasTarget | null = null;
 
 space.add({
@@ -29,7 +34,7 @@ space.add({
     const canvasRadius = space.center.magnitude();
     const canvasHalfMin = Math.min(space.center.x, space.center.y);
 
-    for (const target of TARGETS) {
+    for (const target of targets) {
       let circle = target.toCircle();
       form.fillOnly(RED).circle(circle);
       if (Circle.withinBound(circle, space.pointer)) {
@@ -38,12 +43,22 @@ space.add({
           .strokeOnly(RED)
           .dash()
           .line(
-            Line.fromAngle(space.center, angleTarget.start() * (Math.PI * 2), canvasRadius)
+            Line.fromAngle(
+              space.center,
+              angleTarget.start() * (Math.PI * 2),
+              canvasRadius
+            )
           );
         form
           .strokeOnly(RED)
           .dash()
-          .line(Line.fromAngle(space.center, angleTarget.end() * (Math.PI * 2), canvasRadius));
+          .line(
+            Line.fromAngle(
+              space.center,
+              angleTarget.end() * (Math.PI * 2),
+              canvasRadius
+            )
+          );
       }
     }
     form.reset();
@@ -67,11 +82,11 @@ space.add({
           .rotate2D(a)
       );
     }
-    form.point(space.center, canvasHalfMin * PARAMS.outMin, "circle");
-    form.point(space.center, canvasHalfMin * PARAMS.outMax, "circle");
+    form.point(space.center, canvasHalfMin * params.outMin, "circle");
+    form.point(space.center, canvasHalfMin * params.outMax, "circle");
     form.reset();
 
-    let angleTargets = TARGETS.map((canvasTarget) =>
+    let angleTargets = targets.map((canvasTarget) =>
       canvasTarget.toAngleTarget()
     );
 
@@ -80,37 +95,42 @@ space.add({
     let normInputAngle = inputAngle / (Math.PI * 2);
     let normOutputAngle = transform(normInputAngle, angleTargets);
     let outputAngle = normOutputAngle * (Math.PI * 2);
-    form
-      .strokeOnly(GREEN)
-      .dash()
-      .line(Line.fromAngle(space.center, inputAngle, canvasRadius));
+    if (params.showInputDirection) {
+      form
+        .strokeOnly(GREEN)
+        .dash()
+        .line(Line.fromAngle(space.center, inputAngle, canvasRadius));
+    }
     form
       .strokeOnly("#fff")
       .dash(false)
       .line(Line.fromAngle(space.center, outputAngle, canvasRadius));
     form.reset();
 
-    let angleStep = (Math.PI * 2) / PARAMS.resolution;
-    for (let i = 1; i <= PARAMS.resolution; i++) {
-      let inputStart = (i - 1) * angleStep;
-      let inputEnd = i * angleStep;
-      let outputStart = transform(inputStart, angleTargets);
-      let outputEnd = transform(inputEnd, angleTargets);
+    let angleStep = (Math.PI * 2) / params.resolution;
+    for (let i = 1; i <= params.resolution; i++) {
+      let inputStart = (i - 1) * angleStep - Math.PI;
+      let inputEnd = i * angleStep - Math.PI;
+      let normInputStart = inputStart / (Math.PI * 2);
+      let normInputEnd = inputEnd / (Math.PI * 2);
+      let outputStart =
+        transform(normInputStart, angleTargets) - normInputStart;
+      let outputEnd = transform(normInputEnd, angleTargets) - normInputEnd;
       let distStart =
         Num.mapToRange(
           outputStart,
-          0,
-          Math.PI * 2,
-          PARAMS.outMin,
-          PARAMS.outMax
+          -params.inEdge,
+          params.inEdge,
+          params.outMin,
+          params.outMax
         ) * canvasHalfMin;
       let distEnd =
         Num.mapToRange(
           outputEnd,
-          0,
-          Math.PI * 2,
-          PARAMS.outMin,
-          PARAMS.outMax
+          -params.inEdge,
+          params.inEdge,
+          params.outMin,
+          params.outMax
         ) * canvasHalfMin;
       let ptStart = new Pt(
         Math.cos(inputStart) * distStart,
@@ -127,10 +147,10 @@ space.add({
   },
   action(type, px, py, evt) {
     if (type == "click" && !pendingTarget) {
-      for (let i = TARGETS.length - 1; i >= 0; i--) {
-        let target = TARGETS[i];
+      for (let i = targets.length - 1; i >= 0; i--) {
+        let target = targets[i];
         if (target.isWithin(new Pt(px, py))) {
-          TARGETS.splice(i, 1);
+          targets.splice(i, 1);
         }
       }
     }
@@ -146,7 +166,7 @@ space.add({
     }
     if (type == "drop" && pendingTarget) {
       if (pendingTarget.radius > 5) {
-        TARGETS.push(pendingTarget);
+        targets.push(pendingTarget);
       }
       pendingTarget = null;
     }

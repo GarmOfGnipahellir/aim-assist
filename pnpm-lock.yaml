@@ -2,6 +2,7 @@ lockfileVersion: 5.4
 
 specifiers:
   '@tweakpane/core': ^1.1.5
+  '@types/node': ^18.14.6
   complex.js: ^2.1.1
   parcel: ^2.8.3
   pts: ^0.11.3
@@ -14,6 +15,7 @@ dependencies:
 
 devDependencies:
   '@tweakpane/core': 1.1.5
+  '@types/node': 18.14.6
   parcel: 2.8.3
 
 packages:
@@ -931,6 +933,10 @@ packages:
 
   /@tweakpane/core/1.1.5:
     resolution: {integrity: sha512-qbIMNLLZOxiMs59+V+1F8xRe9yHGhBl/zEHPTf2k4/GOYImy03tyovVcjeNTfa/f5OEGyeQlItH6pLdm1ANfOw==}
+    dev: true
+
+  /@types/node/18.14.6:
+    resolution: {integrity: sha512-93+VvleD3mXwlLI/xASjw0FzKcwzl3OdTCzm1LaRfqgS21gfFtK3zDXM5Op9TeeMsJVOaJ2VRDpT9q4Y3d0AvA==}
     dev: true
 
   /@types/parse-json/4.0.0:

@@ -1,4 +1,4 @@
-import { space, TARGETS } from ".";
+import { space, targets } from ".";
 import { AngleTarget } from "./target";
 
 let sin = Math.sin;
@@ -81,7 +81,7 @@ function transformSinCombiner(input: number, targets: AngleTarget[]): number {
 
   let rawAlphas: number[] = [];
   for (const target of targets) {
-    rawAlphas.push(1 - pow(1 - base((x - target.position) / target.radius), 1));
+    rawAlphas.push(1 - pow(1 - base((x - target.position) / (target.radius * 2)), 1));
   }
 
   let alphas: number[] = [];
