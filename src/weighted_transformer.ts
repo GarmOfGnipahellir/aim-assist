@@ -35,3 +35,36 @@ export function weights(input: number, targets: AngleTarget[]): number[] {
 export function weightsSum(input: number, targets: AngleTarget[]): number {
   return weights(input, targets).reduce((prev, cur) => prev + cur, 0);
 }
+
+export function offset(
+  input: number,
+  target: AngleTarget,
+  weight: number
+): number {
+  let delta = target.position - input;
+  return delta * weight;
+}
+
+export function offsets(
+  input: number,
+  targets: AngleTarget[],
+  weights: number[]
+): number[] {
+  return targets.map((target, i) => {
+    return offset(input, target, weights[i]);
+  });
+}
+
+export function offsetsSum(
+  input: number,
+  targets: AngleTarget[],
+  weights: number[]
+): number {
+  return offsets(input, targets, weights).reduce((prev, cur) => prev + cur, 0);
+}
+
+export function transform(input: number, targets: AngleTarget[]): number {
+  let ws = weights(input, targets);
+  let os = offsetsSum(input, targets, ws);
+  return input + os;
+}

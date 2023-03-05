@@ -1,10 +1,15 @@
 import { Pane } from "tweakpane";
 import { CanvasSpace, Pt, Group, Line, Circle, Num } from "pts";
 import { CanvasTarget } from "./target";
-import transform from "./transformer";
 import "./input";
 import { setInputMode, updateInput, inputAngle } from "./input";
-import { weight, weights, weightsSum } from "./weighted_transformer";
+import {
+  offset,
+  weight,
+  weights,
+  weightsSum,
+  transform,
+} from "./weighted_transformer";
 import { CircleGraph } from "./circle_graph";
 
 export let params = {
@@ -111,6 +116,14 @@ space.add({
       .line(Line.fromAngle(space.center, outputAngle, canvasRadius));
     form.reset();
 
+    // for (let i = 0; i < targets.length; i++) {
+    //   new CircleGraph((input) =>
+    //     offset(input, angleTargets[i], weight(input, angleTargets[i]))
+    //   )
+    //     .color(targets[i].color.hex)
+    //     .draw();
+    // }
+    // new CircleGraph((input) => transform(input, angleTargets)).draw();
     for (let i = 0; i < targets.length; i++) {
       new CircleGraph((input) => weight(input, angleTargets[i]))
         .color(targets[i].color.hex)
