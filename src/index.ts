@@ -15,12 +15,14 @@ export let params = {
   showTargetEdges: true,
 };
 
-const pane = new Pane({ title: "Parameters" });
-pane.addInput(params, "outMiddle", { min: 0.0, max: 1.0 });
-pane.addInput(params, "outEdge", { min: 0.0, max: 1.0 });
-pane.addInput(params, "resolution", { min: 0, max: 1000, step: 10 });
-pane.addInput(params, "showInputDirection");
-pane.addInput(params, "showTargetEdges");
+const pane = new Pane();
+let graphFolder = pane.addFolder({ title: "Graph" });
+graphFolder.addInput(params, "outMiddle", { min: 0.0, max: 1.0 });
+graphFolder.addInput(params, "outEdge", { min: 0.0, max: 1.0 });
+graphFolder.addInput(params, "resolution", { min: 0, max: 1000, step: 10 });
+let drawFolder = pane.addFolder({ title: "Show/Hide" });
+drawFolder.addInput(params, "showInputDirection");
+drawFolder.addInput(params, "showTargetEdges");
 
 export const space = new CanvasSpace("#main");
 space.setup({ bgcolor: "#111", resize: true });
@@ -37,7 +39,7 @@ space.add({
     for (const target of targets) {
       let circle = target.toCircle();
       form.fillOnly(RED).circle(circle);
-      if (Circle.withinBound(circle, space.pointer)) {
+      if (params.showTargetEdges && Circle.withinBound(circle, space.pointer)) {
         let angleTarget = target.toAngleTarget();
         form
           .strokeOnly(RED)
