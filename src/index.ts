@@ -8,16 +8,16 @@ const GREEN = "#6f6";
 
 export let params = {
   inEdge: 0.05,
-  outMin: 0.4,
-  outMax: 0.6,
+  outMiddle: 0.2,
+  outEdge: 0.1,
   resolution: 360,
   showInputDirection: true,
   showTargetEdges: true,
 };
 
 const pane = new Pane({ title: "Parameters" });
-pane.addInput(params, "outMin", { min: 0.0, max: 1.0 });
-pane.addInput(params, "outMax", { min: 0.0, max: 1.0 });
+pane.addInput(params, "outMiddle", { min: 0.0, max: 1.0 });
+pane.addInput(params, "outEdge", { min: 0.0, max: 1.0 });
 pane.addInput(params, "resolution", { min: 0, max: 1000, step: 10 });
 pane.addInput(params, "showInputDirection");
 pane.addInput(params, "showTargetEdges");
@@ -82,8 +82,7 @@ space.add({
           .rotate2D(a)
       );
     }
-    form.point(space.center, canvasHalfMin * params.outMin, "circle");
-    form.point(space.center, canvasHalfMin * params.outMax, "circle");
+    form.point(space.center, canvasHalfMin * params.outMiddle, "circle");
     form.reset();
 
     let angleTargets = targets.map((canvasTarget) =>
@@ -121,16 +120,16 @@ space.add({
           outputStart,
           -params.inEdge,
           params.inEdge,
-          params.outMin,
-          params.outMax
+          params.outMiddle - params.outEdge,
+          params.outMiddle + params.outEdge
         ) * canvasHalfMin;
       let distEnd =
         Num.mapToRange(
           outputEnd,
           -params.inEdge,
           params.inEdge,
-          params.outMin,
-          params.outMax
+          params.outMiddle - params.outEdge,
+          params.outMiddle + params.outEdge
         ) * canvasHalfMin;
       let ptStart = new Pt(
         Math.cos(inputStart) * distStart,
