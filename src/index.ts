@@ -137,7 +137,9 @@ space.add({
     //     .color(targets[i].color.hex)
     //     .draw();
     // }
-    new CircleGraph((input) => weightsSum(input, angleTargets)).draw();
+    new CircleGraph((input) =>
+      transformer.weights(input).reduce((prev, cur) => prev + cur, 0)
+    ).draw();
   },
   action(type, px, py, evt) {
     setInputMode("mouse");

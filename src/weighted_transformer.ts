@@ -93,14 +93,43 @@ export class WeightedTransformer {
         overlaps.push({ start: maxStart, end: minEnd });
       }
     }
-    for (const overlap in overlaps) {
-      
+    /*
+    for (let i = 0; i < overlaps.length; i++) {
+      for (let j = 0; j < overlaps.length; j++) {
+        if (i == j) {
+          continue;
+        }
+        let overlap1 = overlaps[i];
+        let overlap2 = overlaps[j];
+
+        if (
+          (overlap1.start > overlap2.start && overlap1.start < overlap2.end) ||
+          (overlap1.end > overlap2.start && overlap1.end < overlap2.end)
+        ) {
+          let minStart = min(overlap1.start, overlap2.start);
+          let maxEnd = max(overlap1.end, overlap2.end);
+          overlaps.push({ start: minStart, end: maxEnd });
+          // TODO: remove combined overlaps
+          // or just accumulate occlusion
+        }
+      }
+    }
+    */
+    for (const overlap of overlaps) {
+      result += (overlap.end - overlap.start) / (target.radius * 2);
     }
     return result;
   }
 
-  transform(input: number): number {
+  weights(input: number): number[] {
     let ws = weights(input, this.targets);
+    ws = ws.map((w, i) => w * (1 - this.occlusionFactor(this.targets[i])));
+    ws = ws.map((w) => saturate(w));
+    return ws;
+  }
+
+  transform(input: number): number {
+    let ws = this.weights(input);
     let os = offsetsSum(input, this.targets, ws);
     return input + os;
   }
