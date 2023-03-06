@@ -9,6 +9,7 @@ import {
   weights,
   weightsSum,
   transform,
+  WeightedTransformer,
 } from "./weighted_transformer";
 import { CircleGraph } from "./circle_graph";
 
@@ -101,13 +102,14 @@ space.add({
     let angleTargets = targets.map((canvasTarget) =>
       canvasTarget.toAngleTarget()
     );
+    let transformer = new WeightedTransformer(angleTargets);
 
     updateInput();
 
     let normInputAngle = inputAngle / (Math.PI * 2);
     let normOutputAngle = normInputAngle;
     if (params.enableTransform) {
-      normOutputAngle = transform(normInputAngle, angleTargets);
+      normOutputAngle = transformer.transform(normInputAngle);
     }
     let outputAngle = normOutputAngle * (Math.PI * 2);
     if (params.showInputDirection) {

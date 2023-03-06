@@ -68,3 +68,40 @@ export function transform(input: number, targets: AngleTarget[]): number {
   let os = offsetsSum(input, targets, ws);
   return input + os;
 }
+
+export class WeightedTransformer {
+  public targets: AngleTarget[];
+
+  constructor(targets: AngleTarget[]) {
+    this.targets = targets.sort((a, b) => b.distance - a.distance);
+  }
+
+  occlusionFactor(target: AngleTarget): number {
+    let result = 0;
+    let overlaps: { start: number; end: number }[] = [];
+    for (const other of this.targets) {
+      if (other.distance >= target.distance) {
+        continue;
+      }
+
+      if (
+        (target.start() > other.start() && target.start() < other.end()) ||
+        (target.end() > other.start() && target.end() < other.end())
+      ) {
+        let maxStart = max(target.start(), other.start());
+        let minEnd = min(target.end(), other.end());
+        overlaps.push({ start: maxStart, end: minEnd });
+      }
+    }
+    for (const overlap in overlaps) {
+      
+    }
+    return result;
+  }
+
+  transform(input: number): number {
+    let ws = weights(input, this.targets);
+    let os = offsetsSum(input, this.targets, ws);
+    return input + os;
+  }
+}
