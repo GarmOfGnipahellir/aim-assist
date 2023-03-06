@@ -11,9 +11,9 @@ export function setInputMode(newMode: InputMode) {
   inputMode = newMode;
 }
 export function updateInput() {
-  if (gamepad) {
+  if (gamepad && inputMode === "mouse") {
     let dir = new Pt(gamepad.axes[2].valueOf(), gamepad.axes[3].valueOf());
-    if (dir.magnitude() > 0.5) {
+    if (dir.magnitudeSq() > 0.5 * 0.5) {
       setInputMode("gamepad");
     }
   }
@@ -36,7 +36,7 @@ function updateInputMouse() {
 function updateInputGamepad() {
   if (gamepad) {
     let dir = new Pt(gamepad.axes[2].valueOf(), gamepad.axes[3].valueOf());
-    if (dir.magnitude() > 0.5) {
+    if (dir.magnitudeSq() > 0.5 * 0.5) {
       inputAngle = Math.atan2(dir.y, dir.x);
     }
   }
