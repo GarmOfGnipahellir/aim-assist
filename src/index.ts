@@ -130,11 +130,11 @@ space.add({
     //     .draw();
     // }
     // new CircleGraph((input) => transform(input, angleTargets)).draw();
-    for (let i = 0; i < targets.length; i++) {
-      new CircleGraph((input) => weight(input, angleTargets[i]))
-        .color(targets[i].color.hex)
-        .draw();
-    }
+    // for (let i = 0; i < targets.length; i++) {
+    //   new CircleGraph((input) => weight(input, angleTargets[i]))
+    //     .color(targets[i].color.hex)
+    //     .draw();
+    // }
     new CircleGraph((input) => weightsSum(input, angleTargets)).draw();
   },
   action(type, px, py, evt) {
