@@ -13,6 +13,7 @@ import {
 import { CircleGraph } from "./circle_graph";
 
 export let params = {
+  enableTransform: true,
   inEdge: 1.0,
   outMiddle: 0.5,
   outEdge: 0.1,
@@ -22,6 +23,8 @@ export let params = {
 };
 
 const pane = new Pane();
+let generalFolder = pane.addFolder({ title: "General" });
+generalFolder.addInput(params, "enableTransform");
 let graphFolder = pane.addFolder({ title: "Graph" });
 graphFolder.addInput(params, "outMiddle", { min: 0.0, max: 1.0 });
 graphFolder.addInput(params, "outEdge", { min: 0.0, max: 1.0 });
@@ -102,7 +105,10 @@ space.add({
     updateInput();
 
     let normInputAngle = inputAngle / (Math.PI * 2);
-    let normOutputAngle = transform(normInputAngle, angleTargets);
+    let normOutputAngle = normInputAngle;
+    if (params.enableTransform) {
+      normOutputAngle = transform(normInputAngle, angleTargets);
+    }
     let outputAngle = normOutputAngle * (Math.PI * 2);
     if (params.showInputDirection) {
       form
