@@ -3,14 +3,7 @@ import { CanvasSpace, Pt, Group, Line, Circle, Num } from "pts";
 import { CanvasTarget } from "./target";
 import "./input";
 import { setInputMode, updateInput, inputAngle } from "./input";
-import {
-  offset,
-  weight,
-  weights,
-  weightsSum,
-  transform,
-  WeightedTransformer,
-} from "./weighted_transformer";
+import { WeightedTransformer } from "./weighted_transformer";
 import { CircleGraph } from "./circle_graph";
 
 export let params = {
