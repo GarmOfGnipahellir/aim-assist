@@ -27,10 +27,79 @@ export class WeightedTransformer {
     this.targets = targets.sort((a, b) => b.distance - a.distance);
   }
 
+  closestInfluenceOverlap(target: AngleTarget): AngleTarget | null {
+    let closestDistance = Number.MAX_VALUE;
+    let closestTarget: AngleTarget | null = null;
+    for (const other of this.targets) {
+      if (!target.isInfluenceOverlapping(other)) {
+        continue;
+      }
+      let distance = abs(target.position - other.position);
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestTarget = other;
+      }
+    }
+    return closestTarget;
+  }
+
+  closestLeft(target: AngleTarget): AngleTarget | null {
+    let closestDistance = Number.MAX_VALUE;
+    let closestTarget: AngleTarget | null = null;
+    for (const other of this.targets) {
+      if (target === other || target.position < other.position) {
+        continue;
+      }
+      let distance = abs(target.position - other.position);
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestTarget = other;
+      }
+    }
+    return closestTarget;
+  }
+
+  closestRight(target: AngleTarget): AngleTarget | null {
+    let closestDistance = Number.MAX_VALUE;
+    let closestTarget: AngleTarget | null = null;
+    for (const other of this.targets) {
+      if (target === other || target.position > other.position) {
+        continue;
+      }
+      let distance = abs(target.position - other.position);
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestTarget = other;
+      }
+    }
+    return closestTarget;
+  }
+
+  influenceLeft(target: AngleTarget): number {
+    let closest = this.closestLeft(target);
+    if (!closest || !target.isInfluenceOverlapping(closest)) {
+      return target.influenceRadius;
+    }
+    return abs(closest.position - target.position) / 2;
+  }
+
+  influenceRight(target: AngleTarget): number {
+    let closest = this.closestRight(target);
+    if (!closest || !target.isInfluenceOverlapping(closest)) {
+      return target.influenceRadius;
+    }
+    return abs(closest.position - target.position) / 2;
+  }
+
   baseWeight(input: number, target: AngleTarget): number {
-    let x = (input - target.position) / (target.radius * 8) + 0.5;
-    let mask = saturate(1 - abs(floor(x)));
-    return (sin((x - 0.25) * PI * 2) * 0.5 + 0.5) * mask;
+    let il = this.influenceLeft(target);
+    let start = (input - target.position) / il + 1;
+    start *= saturate(1 - abs(floor(start)));
+    let ir = this.influenceRight(target);
+    let end = (target.position - input) / ir + 1;
+    end *= saturate(1 - abs(floor(end)));
+    // return start + end;
+    return sin((start + end - 0.5) * PI) * 0.5 + 0.5;
   }
 
   occlusionFactor(target: AngleTarget): number {
@@ -41,12 +110,9 @@ export class WeightedTransformer {
         continue;
       }
 
-      if (
-        (target.start() > other.start() && target.start() < other.end()) ||
-        (target.end() > other.start() && target.end() < other.end())
-      ) {
-        let maxStart = max(target.start(), other.start());
-        let minEnd = min(target.end(), other.end());
+      if (target.isOverlapping(other)) {
+        let maxStart = max(target.start, other.start);
+        let minEnd = min(target.end, other.end);
         overlaps.push({ start: maxStart, end: minEnd });
       }
     }

@@ -1,5 +1,5 @@
 import { Circle, Color, Group, Pt, PtLike } from "pts";
-import { space } from ".";
+import { params, space } from ".";
 
 export class CanvasTarget {
   public color: Color;
@@ -26,17 +26,45 @@ export class CanvasTarget {
 }
 
 export class AngleTarget {
+  public influenceRadius: number;
+
   constructor(
     public position: number,
     public radius: number,
     public distance: number
-  ) {}
+  ) {
+    this.influenceRadius = radius * params.influenceFactor;
+  }
 
-  start(): number {
+  get start(): number {
     return this.position - this.radius;
   }
 
-  end(): number {
+  get end(): number {
     return this.position + this.radius;
+  }
+
+  get influenceStart(): number {
+    return this.position - this.influenceRadius;
+  }
+
+  get influenceEnd(): number {
+    return this.position + this.influenceRadius;
+  }
+
+  isOverlapping(other: AngleTarget): boolean {
+    return (
+      (this.start > other.start && this.start < other.end) ||
+      (this.end > other.start && this.end < other.end)
+    );
+  }
+
+  isInfluenceOverlapping(other: AngleTarget): boolean {
+    return (
+      (this.influenceStart > other.influenceStart &&
+        this.influenceStart < other.influenceEnd) ||
+      (this.influenceEnd > other.influenceStart &&
+        this.influenceEnd < other.influenceEnd)
+    );
   }
 }

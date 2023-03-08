@@ -8,6 +8,7 @@ import { CircleGraph } from "./circle_graph";
 
 export let params = {
   enableTransform: true,
+  influenceFactor: 4.0,
   inEdge: 1.0,
   outMiddle: 0.5,
   outEdge: 0.1,
@@ -19,6 +20,7 @@ export let params = {
 const pane = new Pane();
 let generalFolder = pane.addFolder({ title: "General" });
 generalFolder.addInput(params, "enableTransform");
+generalFolder.addInput(params, "influenceFactor");
 let graphFolder = pane.addFolder({ title: "Graph" });
 graphFolder.addInput(params, "outMiddle", { min: 0.0, max: 1.0 });
 graphFolder.addInput(params, "outEdge", { min: 0.0, max: 1.0 });
@@ -49,23 +51,18 @@ space.add({
         form
           .strokeOnly(target.color.hex)
           .dash()
-          .line(
+          .lines([
             Line.fromAngle(
               space.center,
-              angleTarget.start() * (Math.PI * 2),
+              angleTarget.start * (Math.PI * 2),
               canvasRadius
-            )
-          );
-        form
-          .strokeOnly(target.color.hex)
-          .dash()
-          .line(
+            ),
             Line.fromAngle(
               space.center,
-              angleTarget.end() * (Math.PI * 2),
+              angleTarget.end * (Math.PI * 2),
               canvasRadius
-            )
-          );
+            ),
+          ]);
       }
     }
     form.reset();
